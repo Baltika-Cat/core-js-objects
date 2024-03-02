@@ -261,8 +261,16 @@ function fromJSON(proto, json) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort((x, y) => {
+    if (x.country > y.country) {
+      return 1;
+    }
+    if (x.country < y.country) {
+      return -1;
+    }
+    return x.city.localeCompare(y.city);
+  });
 }
 
 /**
@@ -295,8 +303,22 @@ function sortCitiesArray(/* arr */) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  const map = new Map();
+  const count = array.length - 1;
+  let number = 0;
+  let key = keySelector(array[number]);
+  function test() {
+    key = keySelector(array[number]);
+    if (map.has(key)) map.get(key).push(valueSelector(array[number]));
+    else map.set(key, [valueSelector(array[number])]);
+    if (number < count) {
+      number += 1;
+      test();
+    }
+  }
+  test();
+  return map;
 }
 
 /**
@@ -354,32 +376,48 @@ function group(/* array, keySelector, valueSelector */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  str: '',
+  element(value) {
+    this.str += `${value}`;
+    return this;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.str += `#${value}`;
+    return this;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.str += `.${value}`;
+    return this;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.str += `[${value}]`;
+    return this;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.str += `:${value}`;
+    return this;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    this.str += `::${value}`;
+    return this;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const sel1 = selector1;
+    const sel2 = selector2;
+    this.str += `${sel1} ${combinator} ${sel2}`;
+    return this;
+  },
+
+  stringify() {
+    const result = this.str;
+    this.str = '';
+    return result;
   },
 };
 
